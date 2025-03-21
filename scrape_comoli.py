@@ -55,8 +55,11 @@ def save_current_content(date, content):
         'content': content,
         'last_updated': datetime.now().isoformat()
     }
+    print(f"Saving to file: {STORAGE_FILE}")
+    print(f"Current working directory: {os.getcwd()}")
     with open(STORAGE_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"File saved successfully. File exists: {os.path.exists(STORAGE_FILE)}")
 
 def send_line_notification(message):
     try:

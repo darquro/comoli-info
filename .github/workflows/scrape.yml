@@ -27,6 +27,20 @@ jobs:
           pip install wheel setuptools
           pip install -r requirements.txt
 
+      - name: Verify environment variables
+        run: |
+          if [ -z "$LINE_CHANNEL_ACCESS_TOKEN" ]; then
+            echo "Error: LINE_CHANNEL_ACCESS_TOKEN is not set"
+            exit 1
+          fi
+          if [ -z "$LINE_USER_ID" ]; then
+            echo "Error: LINE_USER_ID is not set"
+            exit 1
+          fi
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
+
       - name: Run scraper
         env:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
@@ -34,9 +48,10 @@ jobs:
         run: python scrape_comoli.py
 
       - name: Commit changes
+        if: success()  # スクリプトが成功した場合のみ実行
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add -A  # 全ての変更をステージング
-          git diff --staged --quiet || git commit -m "Update previous content"  # 変更がある場合のみコミット
+          git add -A
+          git diff --staged --quiet || git commit -m "Update previous content"
           git push || echo "No changes to push" 

@@ -6,6 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from linebot.v3.messaging import MessagingApi, ApiClient, Configuration
 from linebot.v3.messaging import TextMessage, PushMessageRequest
+import sys
 
 # Load environment variables
 load_dotenv()
@@ -71,35 +72,47 @@ def send_line_notification(message):
                 messages=[message]
             )
             
-            line_bot_api.push_message(request)
+            response = line_bot_api.push_message(request)
             print("LINE notification sent successfully")
+            return True
     except Exception as e:
         print(f"Error sending LINE notification: {e}")
+        # エラーの詳細情報を出力
+        import traceback
+        print(traceback.format_exc())
+        return False
 
 def main():
-    # Scrape current content
-    current_date, current_content = scrape_comoli_info()
-    if not current_date:
-        print("Failed to scrape date")
-        return
-    
-    if not current_content:
-        print("Failed to scrape content")
-        return
+    try:
+        # Scrape current content
+        current_date, current_content = scrape_comoli_info()
+        if not current_date:
+            print("Failed to scrape date")
+            return
+        
+        if not current_content:
+            print("Failed to scrape content")
+            return
 
-    # Load previous content
-    previous_data = load_previous_content()
-    previous_date = previous_data.get('date', '')
+        # Load previous content
+        previous_data = load_previous_content()
+        previous_date = previous_data.get('date', '')
 
-    # Compare and notify if different
-    if current_date != previous_date:
-        if send_line_notification(f"COMOLIの更新を検知しました！\n\n日付：{current_date}\n\n{current_content}\n\n{COMOLI_INFO_URL}"):
-            print("Notification sent successfully")
-            save_current_content(current_date, current_content)
+        # Compare and notify if different
+        if current_date != previous_date:
+            message = f"COMOLIの更新を検知しました！\n\n日付：{current_date}\n\n{current_content}\n\n{COMOLI_INFO_URL}"
+            if send_line_notification(message):
+                print("Notification sent successfully")
+                save_current_content(current_date, current_content)
+            else:
+                print("Failed to send LINE notification")
+                sys.exit(1)  # エラーコード1で終了
         else:
-            print("Failed to send notification")
-    else:
-        print("No updates found")
+            print("No updates found")
+
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)  # エラーコード1で終了
 
 if __name__ == '__main__':
     main() 

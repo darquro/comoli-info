@@ -1,6 +1,6 @@
 # COMOLI Info Notifier
 
-COMOLIの情報ページ（https://www.comoli.jp/info）の更新を監視し、更新があった場合にLINE通知を送信するサービスです。
+COMOLIの情報ページ（https://www.comoli.jp/info） の更新を監視し、更新があった場合にLINE通知を送信するサービスです。
 
 ## セットアップ手順
 

@@ -5,16 +5,14 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from dotenv import load_dotenv
 from linebot.v3.messaging import MessagingApi, ApiClient, Configuration
-from linebot.v3.messaging import TextMessage, PushMessageRequest
+from linebot.v3.messaging import TextMessage, BroadcastRequest
 import sys
 
 # Load environment variables
 load_dotenv()
 
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
-LINE_USER_ID = os.getenv('LINE_USER_ID')
 COMOLI_INFO_URL = 'https://www.comoli.jp/info'
-# スクリプトのディレクトリを基準にした相対パスで保存場所を指定
 STORAGE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'previous_content.json')
 
 def scrape_comoli_info():
@@ -70,18 +68,17 @@ def send_line_notification(message):
         with ApiClient(configuration) as api_client:
             line_bot_api = MessagingApi(api_client)
             
+            # Send broadcast message to all followers
             message = TextMessage(text=message)
-            request = PushMessageRequest(
-                to=LINE_USER_ID,
+            request = BroadcastRequest(
                 messages=[message]
             )
             
-            response = line_bot_api.push_message(request)
-            print("LINE notification sent successfully")
+            response = line_bot_api.broadcast(request)
+            print("LINE notification broadcast successfully")
             return True
     except Exception as e:
         print(f"Error sending LINE notification: {e}")
-        # エラーの詳細情報を出力
         import traceback
         print(traceback.format_exc())
         return False

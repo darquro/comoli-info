@@ -7,13 +7,26 @@ COMOLIの公式サイトの更新情報を自動的にスクレイピングし�
 - COMOLIの[お知らせページ](https://www.comoli.jp/info)を定期的にスクレイピング
 - 新しい投稿を検出すると、LINE通知で更新内容を送信
 - GitHub Actionsで毎日自動実行（日本時間13:00）
-- ローカル環境での手動実行にも対応
+- LINE公式アカウントをフォローしているすべてのユーザーに通知を送信
 
 ## 必要条件
 
 - Python 3.10以上
 - LINE Messaging API のアクセストークン
-- LINE ユーザーID
+- LINE Channel Secret
+
+## LINE Bot の設定
+
+1. [LINE Developers Console](https://developers.line.biz/console/)にアクセス
+2. 新規プロバイダーを作成（既存のものがあれば不要）
+3. 新規チャネル（Messaging API）を作成
+4. チャネル基本設定から以下の情報を取得：
+   - Channel Secret
+   - チャネルアクセストークン（発行が必要）
+5. 応答設定：
+   - 応答メッセージを無効化
+   - グループ・複数人チャットを無効化（任意）
+6. QRコードを取得し、ユーザーに共有
 
 ## セットアップ
 
@@ -34,7 +47,7 @@ vim .env
 
 必要な環境変数：
 - `LINE_CHANNEL_ACCESS_TOKEN`: LINE Messaging APIのチャネルアクセストークン
-- `LINE_USER_ID`: 通知を受け取るLINEユーザーのID
+- `LINE_CHANNEL_SECRET`: LINEチャネルのシークレットキー
 
 3. 依存関係のインストール
 ```bash
@@ -43,7 +56,7 @@ make setup
 
 ## 使用方法
 
-### ローカルでの実行
+### スクレイピングの実行
 
 スクリプトを実行：
 ```bash
@@ -60,8 +73,14 @@ make clean
 1. GitHubリポジトリの"Settings" > "Secrets and variables" > "Actions"に移動
 2. 以下のシークレットを追加：
    - `LINE_CHANNEL_ACCESS_TOKEN`
-   - `LINE_USER_ID`
+   - `LINE_CHANNEL_SECRET`
 3. GitHub Actionsのワークフローが自動的に実行されます（毎日日本時間13:00）
+
+### LINE通知の受信方法
+
+1. LINE公式アカウントのQRコードをスキャン
+2. 友だち追加
+3. 自動的に更新通知を受信開始
 
 ## ファイル構成
 
@@ -77,6 +96,7 @@ make clean
 - `.env`ファイルはGitにコミットしないでください（セキュリティのため）
 - LINE Messaging APIの利用制限に注意してください
 - スクレイピングの際はサーバーに負荷をかけないよう配慮してください
+- LINE Broadcast APIは全フォロワーにメッセージを送信します
 
 ## ライセンス
 

@@ -5,11 +5,16 @@ on:
     - cron: '0 4 * * *'  # 毎日04:00 UTCに実行（日本時間13:00）
   workflow_dispatch:  # 手動実行用
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -50,8 +55,10 @@ jobs:
       - name: Commit changes
         if: success()  # スクリプトが成功した場合のみ実行
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add -A
           git diff --staged --quiet || git commit -m "Update previous content"
-          git push || echo "No changes to push" 
+          git push https://${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF#refs/heads/} || echo "No changes to push"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

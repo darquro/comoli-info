@@ -44,9 +44,6 @@ pip-delete-this-directory.txt
 *.swo
 *~
 
-# Project specific
-previous_content.json
-
 # Unit test / coverage reports
 htmlcov/
 .tox/

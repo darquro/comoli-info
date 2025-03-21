@@ -3,9 +3,9 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-from linebot import LineBotApi
-from linebot.models import TextSendMessage
 from dotenv import load_dotenv
+from linebot.v3.messaging import MessagingApi, ApiClient, Configuration
+from linebot.v3.messaging import TextMessage, PushMessageRequest
 
 # Load environment variables
 load_dotenv()
@@ -56,19 +56,25 @@ def save_current_content(date, content):
     with open(STORAGE_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def send_line_notification(date, content):
-    """Send notification via LINE"""
-    line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+def send_line_notification(message):
     try:
-        message = f"COMOLIの更新を検知しました！\n\n日付：{date}\n\n{content}\n\n{COMOLI_INFO_URL}"
-        line_bot_api.push_message(
-            LINE_USER_ID,
-            TextSendMessage(text=message)
+        configuration = Configuration(
+            access_token=LINE_CHANNEL_ACCESS_TOKEN
         )
-        return True
+        
+        with ApiClient(configuration) as api_client:
+            line_bot_api = MessagingApi(api_client)
+            
+            message = TextMessage(text=message)
+            request = PushMessageRequest(
+                to=LINE_USER_ID,
+                messages=[message]
+            )
+            
+            line_bot_api.push_message(request)
+            print("LINE notification sent successfully")
     except Exception as e:
         print(f"Error sending LINE notification: {e}")
-        return False
 
 def main():
     # Scrape current content
@@ -87,7 +93,7 @@ def main():
 
     # Compare and notify if different
     if current_date != previous_date:
-        if send_line_notification(current_date, current_content):
+        if send_line_notification(f"COMOLIの更新を検知しました！\n\n日付：{current_date}\n\n{current_content}\n\n{COMOLI_INFO_URL}"):
             print("Notification sent successfully")
             save_current_content(current_date, current_content)
         else:

@@ -1,4 +1,4 @@
-.PHONY: setup run clean check-env
+.PHONY: setup run clean check-env test
 
 # Python version
 PYTHON := python3
@@ -8,7 +8,7 @@ check-env:
 	@if [ ! -f .env ]; then \
 		echo "Creating .env file..."; \
 		echo "LINE_CHANNEL_ACCESS_TOKEN=" > .env; \
-		echo "LINE_USER_ID=" >> .env; \
+		echo "LINE_CHANNEL_SECRET=" >> .env; \
 		echo "Please fill in the LINE credentials in .env file"; \
 		exit 1; \
 	fi
@@ -22,6 +22,10 @@ setup: check-env
 # Run the scraper
 run: check-env
 	$(PYTHON) scrape_comoli.py
+
+# Run in test mode (skip content comparison and storage)
+test: check-env
+	$(PYTHON) scrape_comoli.py --test
 
 # Clean up generated files
 clean:

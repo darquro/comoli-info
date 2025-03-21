@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from linebot.v3.messaging import MessagingApi, ApiClient, Configuration
 from linebot.v3.messaging import TextMessage, BroadcastRequest
 import sys
+import argparse
 
 # Load environment variables
 load_dotenv()
@@ -85,6 +86,11 @@ def send_line_notification(message):
 
 def main():
     try:
+        # Parse command line arguments
+        parser = argparse.ArgumentParser(description='COMOLI Info Scraper')
+        parser.add_argument('--test', action='store_true', help='Run in test mode (skip content comparison and storage)')
+        args = parser.parse_args()
+
         # Scrape current content
         current_date, current_content = scrape_comoli_info()
         if not current_date:
@@ -95,13 +101,24 @@ def main():
             print("Failed to scrape content")
             return
 
-        # Load previous content
+        # Create notification message
+        message = f"COMOLIの更新を検知しました！\n\n日付：{current_date}\n\n{current_content}\n\n{COMOLI_INFO_URL}"
+
+        if args.test:
+            # Test mode: Always send notification
+            if send_line_notification(message):
+                print("Test notification sent successfully")
+            else:
+                print("Failed to send LINE notification")
+                sys.exit(1)
+            return
+
+        # Normal mode: Compare with previous content
         previous_data = load_previous_content()
         previous_date = previous_data.get('date', '')
 
         # Compare and notify if different
         if current_date != previous_date:
-            message = f"COMOLIの更新を検知しました！\n\n日付：{current_date}\n\n{current_content}\n\n{COMOLI_INFO_URL}"
             if send_line_notification(message):
                 print("Notification sent successfully")
                 save_current_content(current_date, current_content)

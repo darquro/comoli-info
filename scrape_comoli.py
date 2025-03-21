@@ -14,7 +14,8 @@ load_dotenv()
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_USER_ID = os.getenv('LINE_USER_ID')
 COMOLI_INFO_URL = 'https://www.comoli.jp/info'
-STORAGE_FILE = 'previous_content.json'
+# スクリプトのディレクトリを基準にした相対パスで保存場所を指定
+STORAGE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'previous_content.json')
 
 def scrape_comoli_info():
     """Scrape COMOLI info page"""

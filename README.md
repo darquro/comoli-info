@@ -31,7 +31,7 @@ COMOLIの情報ページ（https://www.comoli.jp/info）の更新を監視し、
 
 ## 仕様
 
-- 毎日午前9時（日本時間）に自動実行
+- 毎日午後1時（日本時間）に自動実行
 - 更新があった場合のみLINE通知
 - 前回の内容は`previous_content.json`に保存
 
